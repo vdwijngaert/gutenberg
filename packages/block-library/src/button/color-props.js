@@ -21,7 +21,7 @@ export default function getColorAndStyleProps(
 	colors,
 	isEdit = false
 ) {
-	// I'd have prefered to avoid the "style" attribute usage here
+	// I'd have preferred to avoid the "style" attribute usage here
 	const { backgroundColor, textColor, gradient, style } = attributes;
 
 	const backgroundClass = getColorClassName(

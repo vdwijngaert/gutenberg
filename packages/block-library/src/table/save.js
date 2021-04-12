@@ -6,35 +6,26 @@ import classnames from 'classnames';
 /**
  * WordPress dependencies
  */
-import {
-	RichText,
-	getColorClassName,
-	useBlockProps,
-} from '@wordpress/block-editor';
+import { RichText, useBlockProps } from '@wordpress/block-editor';
+
+/**
+ * Internal dependencies
+ */
+import getColorAndStyleProps from '../button/color-props';
 
 export default function save( { attributes } ) {
-	const {
-		hasFixedLayout,
-		head,
-		body,
-		foot,
-		backgroundColor,
-		caption,
-	} = attributes;
+	const { hasFixedLayout, head, body, foot, caption } = attributes;
 	const isEmpty = ! head.length && ! body.length && ! foot.length;
 
 	if ( isEmpty ) {
 		return null;
 	}
 
-	const backgroundClass = getColorClassName(
-		'background-color',
-		backgroundColor
-	);
+	// Empty colors array provided as it's only needed for Edit components.
+	const colorProps = getColorAndStyleProps( attributes, [] );
 
-	const classes = classnames( backgroundClass, {
+	const classes = classnames( colorProps.className, {
 		'has-fixed-layout': hasFixedLayout,
-		'has-background': !! backgroundClass,
 	} );
 
 	const hasCaption = ! RichText.isEmpty( caption );
@@ -82,7 +73,10 @@ export default function save( { attributes } ) {
 
 	return (
 		<figure { ...useBlockProps.save() }>
-			<table className={ classes === '' ? undefined : classes }>
+			<table
+				className={ classes === '' ? undefined : classes }
+				style={ colorProps.style }
+			>
 				<Section type="head" rows={ head } />
 				<Section type="body" rows={ body } />
 				<Section type="foot" rows={ foot } />
