@@ -63,6 +63,8 @@ add_action( 'init', 'register_block_core_legacy_widget', 20 );
  * block.
  */
 function handle_legacy_widget_preview_iframe() {
+	global $wp_registered_widgets;
+
 	if ( empty( $_GET['legacy-widget-preview'] ) ) {
 		return;
 	}
@@ -72,6 +74,21 @@ function handle_legacy_widget_preview_iframe() {
 	}
 
 	define( 'IFRAME_REQUEST', true );
+
+	$attributes = $_GET['legacy-widget-preview'];
+
+	if ( isset( $attributes['id'], $wp_registered_widgets[ $attributes['id'] ]['name'] ) ) {
+		$title = $wp_registered_widgets[ $attributes['id'] ]['name'];
+	} elseif ( isset( $attributes['idBase'] ) ) {
+		$widget_object = gutenberg_get_widget_object( $attributes['idBase'] );
+		if ( $widget_object ) {
+			$title = $widget_object->name;
+		}
+	}
+
+	$registry = WP_Block_Type_Registry::get_instance();
+	$block    = $registry->get_registered( 'core/legacy-widget' );
+	$content  = $block->render( $attributes );
 
 	?>
 	<!doctype html>
@@ -93,11 +110,14 @@ function handle_legacy_widget_preview_iframe() {
 	<body <?php body_class(); ?>>
 		<div id="page" class="site">
 			<div id="content" class="site-content">
-				<?php
-				$registry = WP_Block_Type_Registry::get_instance();
-				$block    = $registry->get_registered( 'core/legacy-widget' );
-				echo $block->render( $_GET['legacy-widget-preview'] );
-				?>
+				<?php if ( empty( trim( $content ) ) ) : ?>
+					<?php if ( isset( $title ) ) : ?>
+						<h3><?php echo $title; ?></h3>
+					<?php endif ?>
+					<p><?php _e( 'No preview available.', 'gutenberg' ); ?></p>
+				<?php else : ?>
+					<?php echo $content; ?>
+				<?php endif ?>
 			</div><!-- #content -->
 		</div><!-- #page -->
 		<?php wp_footer(); ?>
