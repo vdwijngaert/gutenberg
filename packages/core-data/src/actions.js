@@ -293,7 +293,13 @@ export function* editEntityRecord( kind, name, recordId, edits, options = {} ) {
 				...edit,
 				// Send the current values for things like the first undo stack entry.
 				edits: Object.keys( edits ).reduce( ( acc, key ) => {
-					acc[ key ] = editedRecord[ key ];
+					const recordValue = record[ key ];
+					const editedRecordValue = editedRecord[ key ];
+					// Make sure to only include actual edits, otherwise the entity is
+					// considered dirty, even though we reached the top of the undo stack.
+					acc[ key ] = isEqual( recordValue, editedRecordValue )
+						? undefined
+						: editedRecordValue;
 					return acc;
 				}, {} ),
 			},
